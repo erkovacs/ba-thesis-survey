@@ -18,17 +18,29 @@ class InputName extends Component {
   }
   render() {
     return (
-      <div>
+      <div className="col-md-4 offset-md-4">
         <h1>Enter your name:</h1>
-        <label>Name</label>
-        <input
-          type="text"
-          id="userName"
-          name="userName"
-          value={this.state.userName}
-          onChange={e => this.handleChange(e)}
-        />
-        <button onClick={e => this.handleClick(e)}>Submit</button>
+        <form>
+          <div className="form-group">
+            <label for="userName">Name</label>
+            <input
+              type="text"
+              className="form-control"
+              id="userName"
+              name="userName"
+              placeholder="Enter name"
+              value={this.state.userName}
+              onChange={e => this.handleChange(e)}
+            />
+          </div>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            onClick={e => this.handleClick(e)}
+          >
+            Submit
+          </button>
+        </form>
         {this.state.shouldRedirect ? <Redirect to="/fill-survey" /> : null}
       </div>
     );

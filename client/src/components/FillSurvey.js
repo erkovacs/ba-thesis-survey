@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import { Router, Link, Route } from "react-router-dom";
-import { posix } from "path";
+import { Router, Link, Route, Redirect } from "react-router-dom";
 
 class FillSurvey extends Component {
   API_URL = "/api/attractions";
@@ -11,23 +10,70 @@ class FillSurvey extends Component {
       position: null,
       userName: userName,
       attractions: [],
-      scores: []
+      displayAttractions: [],
+      scores: [],
+      search: {
+        searchNrCrt: "",
+        searchName: "",
+        searchDescription: ""
+      },
+      shouldRedirect: false
     };
   }
   render() {
     return (
-      <div>
-        <h1>Complete your survey </h1>
-        <table>
-          <thead>
-            <th>#</th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Your rating</th>
-          </thead>
-          <tbody>{this.renderItems()}</tbody>
-        </table>
-        <button onClick={e => this.handleClick(e)}>Submit</button>
+      <div className="container-fluid">
+        <div className="col-md-12">
+          <div className="alert alert-dismissible alert-primary">
+            <strong>Oh snap!</strong>
+          </div>
+          <h1>Complete your survey </h1>
+          <table className="table table-hover">
+            <thead>
+              <tr>
+                <th>
+                  <input
+                    className="form-control"
+                    placeholder="Nr. Crt"
+                    name="searchNrCrt"
+                    onChange={e => this.handleChange(e)}
+                    value={this.state.search.nrCrt}
+                  />
+                </th>
+                <th>
+                  <input
+                    className="form-control"
+                    placeholder="Name"
+                    name="searchName"
+                    onChange={e => this.handleChange(e)}
+                    value={this.state.search.name}
+                  />
+                </th>
+                <th>
+                  <input
+                    className="form-control"
+                    placeholder="Description"
+                    name="searchDescription"
+                    onChange={e => this.handleChange(e)}
+                    value={this.state.search.description}
+                  />
+                </th>
+                <th />
+              </tr>
+            </thead>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Your rating</th>
+              </tr>
+            </thead>
+            <tbody>{this.renderItems()}</tbody>
+          </table>
+          <button onClick={e => this.handleClick(e)}>Submit</button>
+          {this.state.shouldRedirect ? <Redirect to="/thank-you" /> : null}
+        </div>
       </div>
     );
   }
@@ -36,7 +82,7 @@ class FillSurvey extends Component {
     this.setLocation();
   }
   renderItems = () => {
-    return this.state.attractions.map((attraction, i) => {
+    return this.state.displayAttractions.map((attraction, i) => {
       if (!attraction) {
         return;
       }
@@ -70,7 +116,11 @@ class FillSurvey extends Component {
     console.log(res);
     const json = await res.json();
     if (json.success) {
-      this.setState({ attractions: json.attractions });
+      this.setState({
+        ...this.state,
+        attractions: json.attractions,
+        displayAttractions: json.attractions
+      });
     }
   };
   handleClick = e => {
@@ -82,8 +132,23 @@ class FillSurvey extends Component {
         scores: this.state.scores
       };
       console.log(data);
+      window.localStorage.removeItem("userName");
+      this.setState({ shouldRedirect: true });
     } else {
       alert("Please fill in at least 15 responses!");
+    }
+  };
+  handleChange = e => {
+    const { value, name } = e.target;
+    this.setState({ search: { ...this.state.search, [name]: value } });
+    const property = name.replace("search", "").toLowerCase();
+    if (value !== "") {
+      this.setState({
+        displayAttractions: this.state.attractions.filter(
+          attraction =>
+            attraction && new RegExp(value, "gi").test(attraction[property])
+        )
+      });
     }
   };
   setLocation = () => {
