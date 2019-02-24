@@ -2,10 +2,12 @@ import React, { Component } from "react";
 import { Router, Link, Route, Redirect } from "react-router-dom";
 
 class FillSurvey extends Component {
+  REQUIRED_SCORES = 15;
   API_URL = "/api/attractions";
   constructor() {
     super();
     const userName = window.localStorage.getItem("userName");
+    this.currentRef = React.createRef();
     this.state = {
       position: null,
       userName: userName,
@@ -24,10 +26,8 @@ class FillSurvey extends Component {
     return (
       <div className="container-fluid">
         <div className="col-md-12">
-          <div className="alert alert-dismissible alert-primary">
-            <strong>Oh snap!</strong>
-          </div>
-          <h1>Complete your survey </h1>
+          {this.renderScoresMessage()}
+          <h1 ref={this.currentRef}>Complete your survey </h1>
           <table className="table table-hover">
             <thead>
               <tr>
@@ -63,15 +63,15 @@ class FillSurvey extends Component {
             </thead>
             <thead>
               <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Your rating</th>
+                <th width="8%">#</th>
+                <th width="20%">Name</th>
+                <th width="60%">Description</th>
+                <th width="12%">Your rating</th>
               </tr>
             </thead>
             <tbody>{this.renderItems()}</tbody>
           </table>
-          <button onClick={e => this.handleClick(e)}>Submit</button>
+          {this.renderToolbox()}
           {this.state.shouldRedirect ? <Redirect to="/thank-you" /> : null}
         </div>
       </div>
@@ -100,12 +100,15 @@ class FillSurvey extends Component {
               : attraction.description}
           </td>
           <td
+            className="rating-stars"
             onClick={e => {
               // Rating logic here
               this.updateScore(e, i);
             }}
           >
-            Stars
+            <div className="stars-outer">
+              <div className="stars-inner" />
+            </div>
           </td>
         </tr>
       );
@@ -113,7 +116,6 @@ class FillSurvey extends Component {
   };
   fetchItems = async () => {
     const res = await fetch(this.API_URL);
-    console.log(res);
     const json = await res.json();
     if (json.success) {
       this.setState({
@@ -141,13 +143,20 @@ class FillSurvey extends Component {
   handleChange = e => {
     const { value, name } = e.target;
     this.setState({ search: { ...this.state.search, [name]: value } });
-    const property = name.replace("search", "").toLowerCase();
+    let property = name.replace("search", "").toLowerCase();
+    if (name === "searchNrCrt") {
+      property = "nrCrt";
+    }
     if (value !== "") {
       this.setState({
         displayAttractions: this.state.attractions.filter(
           attraction =>
             attraction && new RegExp(value, "gi").test(attraction[property])
         )
+      });
+    } else {
+      this.setState({
+        displayAttractions: this.state.attractions
       });
     }
   };
@@ -163,7 +172,11 @@ class FillSurvey extends Component {
     return this.state.scores.length > 15;
   };
   updateScore = (e, i) => {
+    // TODO::Bug here, takes offset width of wrong element
     const rating = e.nativeEvent.offsetX / e.nativeEvent.target.offsetWidth;
+    const innerStars = e.target.children[0] ? e.target.children[0] : e.target;
+    console.log(e.target);
+    innerStars.style.width = rating * 100 + "%";
     const score = {
       attractionId: i,
       rating
@@ -176,6 +189,65 @@ class FillSurvey extends Component {
         score
       ]
     });
+  };
+  scrollToTop = ref => {
+    ref.current.scrollIntoView({ behavior: "smooth" });
+  };
+  renderScoresMessage = () => {
+    const retval = (
+      <div
+        className={`scores-message alert alert-${
+          this.REQUIRED_SCORES - this.state.scores.length <= 0
+            ? "success"
+            : "primary"
+        }`}
+      >
+        {this.REQUIRED_SCORES - this.state.scores.length > 0 ? (
+          <div>
+            You still have to rate
+            <strong>
+              {" " + (this.REQUIRED_SCORES - this.state.scores.length)} out of
+              {" " + this.REQUIRED_SCORES + " "}
+            </strong>
+            items.
+          </div>
+        ) : (
+          <div>You can submit!</div>
+        )}
+      </div>
+    );
+    return retval;
+  };
+  renderToolbox = () => {
+    return (
+      <div className="col-md-3 toolbox">
+        <div className="card">
+          <div className="card-header">Touristic attractions</div>
+          <div className="card-body">
+            <p className="card-text">
+              Please provide your opinion on the touristic attractions in the
+              list. To find attractions that you have visited, you can search
+              the list from the header. Thank you for participating!
+            </p>
+          </div>
+          <div className="card-footer">
+            <button
+              className="btn btn-primary"
+              onClick={e => this.handleClick(e)}
+            >
+              Submit
+            </button>
+            &nbsp;
+            <button
+              className="btn btn-secondary float-right"
+              onClick={() => this.scrollToTop(this.currentRef)}
+            >
+              Go to top
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 }
 

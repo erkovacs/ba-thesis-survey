@@ -4,6 +4,7 @@ import InputName from "./components/InputName";
 import FillSurvey from "./components/FillSurvey";
 import ThankYou from "./components/ThankYou";
 import "./assets/bootstrap.css";
+import "font-awesome/css/font-awesome.min.css";
 import "./App.css";
 
 class App extends Component {
