@@ -4,6 +4,7 @@ import { Router, Link, Route, Redirect } from "react-router-dom";
 class FillSurvey extends Component {
   REQUIRED_SCORES = 15;
   API_URL = "/api/attractions";
+  API_POST = "/api/response";
   constructor() {
     super();
     const userName = window.localStorage.getItem("userName");
@@ -14,6 +15,7 @@ class FillSurvey extends Component {
       attractions: [],
       displayAttractions: [],
       scores: [],
+      scoreStates: [],
       search: {
         searchNrCrt: "",
         searchName: "",
@@ -99,15 +101,18 @@ class FillSurvey extends Component {
               ? attraction.description.substring(0, 180) + "..."
               : attraction.description}
           </td>
-          <td
-            className="rating-stars"
-            onClick={e => {
-              // Rating logic here
-              this.updateScore(e, i);
-            }}
-          >
-            <div className="stars-outer">
-              <div className="stars-inner" />
+          <td className="rating-stars">
+            <div
+              className="stars-outer"
+              onClick={e => {
+                // Rating logic here
+                this.updateScore(e, i);
+              }}
+            >
+              <div
+                className="stars-inner"
+                style={{ width: `${this.state.scoreStates[i]}%` }}
+              />
             </div>
           </td>
         </tr>
@@ -125,7 +130,7 @@ class FillSurvey extends Component {
       });
     }
   };
-  handleClick = e => {
+  handleClick = async e => {
     e.preventDefault();
     if (this.validateScores()) {
       const data = {
@@ -133,9 +138,18 @@ class FillSurvey extends Component {
         userName: this.state.userName,
         scores: this.state.scores
       };
-      console.log(data);
-      window.localStorage.removeItem("userName");
-      this.setState({ shouldRedirect: true });
+      const res = await fetch(this.API_POST, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const json = await res.json();
+      if (json.success) {
+        window.localStorage.removeItem("userName");
+        this.setState({ shouldRedirect: true });
+      } else {
+        alert(`An error has occurred: ${json.error}`);
+      }
     } else {
       alert("Please fill in at least 15 responses!");
     }
@@ -169,14 +183,17 @@ class FillSurvey extends Component {
     }
   };
   validateScores = () => {
-    return this.state.scores.length > 15;
+    return this.state.scores.length >= 15;
   };
   updateScore = (e, i) => {
     // TODO::Bug here, takes offset width of wrong element
     const rating = e.nativeEvent.offsetX / e.nativeEvent.target.offsetWidth;
     const innerStars = e.target.children[0] ? e.target.children[0] : e.target;
-    console.log(e.target);
-    innerStars.style.width = rating * 100 + "%";
+    const newScoreStates = this.state.scoreStates;
+    newScoreStates[i] = Math.ceil(rating * 100);
+    this.setState({
+      scoreStates: newScoreStates
+    });
     const score = {
       attractionId: i,
       rating

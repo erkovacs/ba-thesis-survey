@@ -22,7 +22,7 @@ class InputName extends Component {
         <h1>Enter your name:</h1>
         <form>
           <div className="form-group">
-            <label for="userName">Name</label>
+            <label htmlFor="userName">Name</label>
             <input
               type="text"
               className="form-control"

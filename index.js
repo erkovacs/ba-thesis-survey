@@ -3,7 +3,7 @@ const bodyParser = require("body-parser");
 const fs = require("fs");
 
 const ATTRACTIONS_PATH = "./db/attractions.csv";
-
+const OUTPUT_PATH = "./db/responses.json";
 const db = {
   attractions: null
 };
@@ -48,7 +48,33 @@ app.get("/api/attractions", (req, res) => {
 });
 
 app.post("/api/response", (req, res) => {
-  res.status(200).json({ message: "Hello World" });
+  const { location, userName, scores } = req.body;
+  if (!userName || !scores) {
+    res.status(400).json({
+      success: false,
+      message:
+        "Bad request. Must have schema: { location: [object], userName: [string], scores: [array]}"
+    });
+  } else {
+    fs.readFile(OUTPUT_PATH, "utf-8", (err, data) => {
+      if (err) {
+        res.status(500).json({ success: false, error: err });
+      } else {
+        const db = JSON.parse(data) || [];
+        db[db.length] = {
+          location: location || null,
+          userName: userName,
+          scores: scores
+        };
+        fs.writeFile(OUTPUT_PATH, JSON.stringify(db), "utf-8", _err => {
+          if (_err) {
+            res.status(500).json({ success: false, error: _err });
+          }
+          res.status(200).json({ success: true });
+        });
+      }
+    });
+  }
 });
 
 app.listen(process.env.PORT || 8080, function() {
