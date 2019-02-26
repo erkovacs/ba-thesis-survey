@@ -10,7 +10,7 @@ class FillSurvey extends Component {
     const userName = window.localStorage.getItem("userName");
     this.currentRef = React.createRef();
     this.state = {
-      position: null,
+      position: [],
       userName: userName,
       attractions: [],
       displayAttractions: [],
@@ -120,35 +120,44 @@ class FillSurvey extends Component {
     });
   };
   fetchItems = async () => {
-    const res = await fetch(this.API_URL);
-    const json = await res.json();
-    if (json.success) {
-      this.setState({
-        ...this.state,
-        attractions: json.attractions,
-        displayAttractions: json.attractions
-      });
+    try{
+      const res = await fetch(this.API_URL);
+      const json = await res.json();
+      if (json.success) {
+        this.setState({
+          ...this.state,
+          attractions: json.attractions,
+          displayAttractions: json.attractions
+        });
+      }
+    } catch (e){
+      alert(`Error has occurred: ${e}`);
     }
   };
   handleClick = async e => {
     e.preventDefault();
     if (this.validateScores()) {
+      const { latitude, longitude } = this.state.position;
       const data = {
-        location: this.state.position,
+        location: { latitude, longitude },
         userName: this.state.userName,
         scores: this.state.scores
       };
-      const res = await fetch(this.API_POST, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      });
-      const json = await res.json();
-      if (json.success) {
-        window.localStorage.removeItem("userName");
-        this.setState({ shouldRedirect: true });
-      } else {
-        alert(`An error has occurred: ${json.error}`);
+      try{
+        const res = await fetch(this.API_POST, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        const json = await res.json();
+        if (json.success) {
+          window.localStorage.removeItem("userName");
+          this.setState({ shouldRedirect: true });
+        } else {
+          alert(`An error has occurred: ${json.error}`);
+        }
+      } catch (e) {
+        alert(`An error has occurred: ${e}`);
       }
     } else {
       alert("Please fill in at least 15 responses!");
@@ -177,9 +186,9 @@ class FillSurvey extends Component {
   setLocation = () => {
     const context = this;
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(position =>
-        context.setState({ position: position.coords })
-      );
+      navigator.geolocation.getCurrentPosition(position =>{
+        context.setState({ position: position.coords });
+      });
     }
   };
   validateScores = () => {

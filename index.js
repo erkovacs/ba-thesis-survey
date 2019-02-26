@@ -60,8 +60,13 @@ app.post("/api/response", (req, res) => {
       if (err) {
         res.status(500).json({ success: false, error: err });
       } else {
-        const db = JSON.parse(data) || [];
-        db[db.length] = {
+        let db;
+        try {
+          db = JSON.parse(data);
+        }catch(e){
+          db = {};
+        }
+        db[userName] = {
           location: location || null,
           userName: userName,
           scores: scores
