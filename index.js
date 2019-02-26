@@ -83,10 +83,10 @@ app.post("/api/response", (req, res) => {
   }
 });
 
-// app.use((req, res, next) => {
-//   console.log("hit 404");
-//   res.redirect(301, "/");
-// });
+app.use((req, res, next) => {
+  console.log("hit 404");
+  res.redirect(301, "/");
+});
 
 app.listen(process.env.PORT || 8080, function() {
   console.log(`Server started on port ${this.address().port}`);
