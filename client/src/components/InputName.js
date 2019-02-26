@@ -53,7 +53,9 @@ class InputName extends Component {
       this.storage.setItem("userName", this.state.userName);
       this.setState({ shouldRedirect: true });
     } else {
-      alert("Invalid name provided, please try again.");
+      alert(
+        "Invalid name provided, use only letters, numbers and '-'. Please try again."
+      );
     }
   };
   handleChange = e => {
