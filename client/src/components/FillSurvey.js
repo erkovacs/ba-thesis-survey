@@ -26,11 +26,13 @@ class FillSurvey extends Component {
   }
   render() {
     return (
-      <div className="container-fluid">
+      <div className="row">
         <div className="col-md-12">
           {this.renderScoresMessage()}
-          <h1 ref={this.currentRef}>Complete your survey </h1>
-          <table className="table table-hover">
+          <h1 ref={this.currentRef} className="panel">
+            Complete your survey{" "}
+          </h1>
+          <table className="table table-hover panel">
             <thead>
               <tr>
                 <th>
@@ -101,26 +103,13 @@ class FillSurvey extends Component {
               ? attraction.description.substring(0, 180) + "..."
               : attraction.description}
           </td>
-          <td className="rating-stars">
-            <div
-              className="stars-outer"
-              onClick={e => {
-                // Rating logic here
-                this.updateScore(e, i);
-              }}
-            >
-              <div
-                className="stars-inner"
-                style={{ width: `${this.state.scoreStates[i]}%` }}
-              />
-            </div>
-          </td>
+          <td className="rating-stars">{this.renderStars(i)}</td>
         </tr>
       );
     });
   };
   fetchItems = async () => {
-    try{
+    try {
       const res = await fetch(this.API_URL);
       const json = await res.json();
       if (json.success) {
@@ -130,7 +119,7 @@ class FillSurvey extends Component {
           displayAttractions: json.attractions
         });
       }
-    } catch (e){
+    } catch (e) {
       alert(`Error has occurred: ${e}`);
     }
   };
@@ -143,7 +132,7 @@ class FillSurvey extends Component {
         userName: this.state.userName,
         scores: this.state.scores
       };
-      try{
+      try {
         const res = await fetch(this.API_POST, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -186,7 +175,7 @@ class FillSurvey extends Component {
   setLocation = () => {
     const context = this;
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(position =>{
+      navigator.geolocation.getCurrentPosition(position => {
         context.setState({ position: position.coords });
       });
     }
@@ -194,8 +183,27 @@ class FillSurvey extends Component {
   validateScores = () => {
     return this.state.scores.length >= 15;
   };
+  handleRate = (id, rating) => {
+    rating /= 5;
+    const newScoreStates = this.state.scoreStates;
+    newScoreStates[id] = rating;
+    this.setState({
+      scoreStates: newScoreStates
+    });
+    const score = {
+      attractionId: id,
+      rating
+    };
+
+    // Do not allow duplicates. Update the existing record if exists
+    this.setState({
+      scores: [
+        ...this.state.scores.filter(_score => _score.attractionId !== id),
+        score
+      ]
+    });
+  };
   updateScore = (e, i) => {
-    // TODO::Bug here, takes offset width of wrong element
     const rating = e.nativeEvent.offsetX / e.nativeEvent.target.offsetWidth;
     const innerStars = e.target.children[0] ? e.target.children[0] : e.target;
     const newScoreStates = this.state.scoreStates;
@@ -246,34 +254,55 @@ class FillSurvey extends Component {
   };
   renderToolbox = () => {
     return (
-      <div className="col-md-3 toolbox">
-        <div className="card">
-          <div className="card-header">Touristic attractions</div>
-          <div className="card-body">
-            <p className="card-text">
-              Please provide your opinion on the touristic attractions in the
-              list. To find attractions that you have visited, you can search
-              the list from the header. Thank you for participating!
-            </p>
-          </div>
-          <div className="card-footer">
-            <button
-              className="btn btn-primary"
-              onClick={e => this.handleClick(e)}
-            >
-              Submit
-            </button>
-            &nbsp;
-            <button
-              className="btn btn-secondary float-right"
-              onClick={() => this.scrollToTop(this.currentRef)}
-            >
-              Go to top
-            </button>
+      <div className="container-fluid toolbox">
+        <div className="row">
+          <div className="offset-md-9 col-md-3 col-sm-12">
+            <div className="card">
+              <div className="card-header">Touristic attractions</div>
+              <div className="card-body">
+                <p className="card-text">
+                  Please provide your opinion on the touristic attractions in
+                  the list. To find attractions that you have visited, you can
+                  search the list from the header. Thank you for participating!
+                </p>
+              </div>
+              <div className="card-footer">
+                <button
+                  className="btn btn-primary"
+                  onClick={e => this.handleClick(e)}
+                >
+                  Submit
+                </button>
+                &nbsp;
+                <button
+                  className="btn btn-secondary float-right"
+                  onClick={() => this.scrollToTop(this.currentRef)}
+                >
+                  Go to top
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     );
+  };
+  renderStars = id => {
+    // Pretty bad but werks well enough
+    return [1, 2, 3, 4, 5].map(j => {
+      const currentScore = this.state.scoreStates[id];
+      let starClass = "fa-star-o";
+      if (currentScore && currentScore * 5 >= j) {
+        starClass = "fa-star golden";
+      }
+      return (
+        <i
+          className={`fa ${starClass}`}
+          key={id + "." + j}
+          onClick={e => this.handleRate(id, j)}
+        />
+      );
+    });
   };
 }
 

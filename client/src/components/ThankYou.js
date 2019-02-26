@@ -2,9 +2,10 @@ import React from "react";
 
 const ThankYou = props => {
   return (
-    <div className="container-fluid">
+    <div className="row">
+      <div className="col-md-12 spacer" />
       <div className="col-md-8 offset-md-2">
-        <div className="jumbotron">
+        <div className="panel">
           <h1 className="display-3">Thank you!</h1>
           <p className="lead">
             Please accept my heartfelt thanks for filling out this survey.

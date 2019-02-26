@@ -11,7 +11,7 @@ const db = {
 const app = express();
 app.use(bodyParser.json());
 
-app.use(express.static("./client/public"));
+app.use(express.static("./client/build"));
 
 app.get("/api/attractions", (req, res) => {
   if (!db.attractions) {
@@ -63,12 +63,13 @@ app.post("/api/response", (req, res) => {
         let db;
         try {
           db = JSON.parse(data);
-        }catch(e){
+        } catch (e) {
           db = {};
         }
         db[userName] = {
           location: location || null,
           userName: userName,
+          timestamp: new Date(),
           scores: scores
         };
         fs.writeFile(OUTPUT_PATH, JSON.stringify(db), "utf-8", _err => {
@@ -80,6 +81,11 @@ app.post("/api/response", (req, res) => {
       }
     });
   }
+});
+
+app.use((req, res, next) => {
+  console.log("hit 404");
+  res.redirect(301, "/");
 });
 
 app.listen(process.env.PORT || 8080, function() {

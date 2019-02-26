@@ -1,3 +1,17 @@
+.spacer {
+  height: 100px;
+}
+
+.panel {
+  padding: 15px;
+  margin-bottom: 1.25rem;
+  border-radius: 0;
+  background-color: #fff;
+  -webkit-box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.16),
+    0 0 2px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.16), 0 0 2px 0 rgba(0, 0, 0, 0.12);
+}
+
 .scores-message {
   position: fixed;
   right: 12px;
@@ -14,27 +28,7 @@
   font-size: 1.3rem;
 }
 
-.stars-outer {
-  display: inline-block;
-  position: relative;
-  font-family: FontAwesome;
-}
-
-.stars-outer::before {
-  content: "\f006 \f006 \f006 \f006 \f006";
-}
-
-.stars-inner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  width: 0;
-}
-
-.stars-inner::before {
-  content: "\f005 \f005 \f005 \f005 \f005";
+.golden {
   color: #f8ce0b;
 }
 

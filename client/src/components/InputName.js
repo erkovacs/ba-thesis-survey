@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { Redirect } from "react-router-dom";
 
 class InputName extends Component {
-  NAME_REGEX = /^[a-zA-Z\-]+$/;
+  NAME_REGEX = /^[a-zA-Z0-9\-]+$/;
   storage = window.localStorage;
   constructor() {
     super();
@@ -18,30 +18,32 @@ class InputName extends Component {
   }
   render() {
     return (
-      <div className="col-md-4 offset-md-4">
-        <h1>Enter your name:</h1>
-        <form>
-          <div className="form-group">
-            <label htmlFor="userName">Name</label>
-            <input
-              type="text"
-              className="form-control"
-              id="userName"
-              name="userName"
-              placeholder="Enter name"
-              value={this.state.userName}
-              onChange={e => this.handleChange(e)}
-            />
-          </div>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            onClick={e => this.handleClick(e)}
-          >
-            Submit
-          </button>
-        </form>
-        {this.state.shouldRedirect ? <Redirect to="/fill-survey" /> : null}
+      <div className="row">
+        <div className="col-md-12 spacer" />
+        <div className="col-md-4 offset-md-4">
+          <form className="panel">
+            <div className="form-group">
+              <h1>Enter your name:</h1>
+              <input
+                type="text"
+                className="form-control"
+                id="userName"
+                name="userName"
+                placeholder="Enter name"
+                value={this.state.userName}
+                onChange={e => this.handleChange(e)}
+              />
+            </div>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              onClick={e => this.handleClick(e)}
+            >
+              Submit
+            </button>
+          </form>
+          {this.state.shouldRedirect ? <Redirect to="/fill-survey" /> : null}
+        </div>
       </div>
     );
   }

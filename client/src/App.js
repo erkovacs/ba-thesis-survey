@@ -12,9 +12,11 @@ class App extends Component {
     return (
       <Router>
         <Switch>
-          <Route exact path="/" component={InputName} />
-          <Route exact path="/fill-survey" component={FillSurvey} />
-          <Route exact path="/thank-you" component={ThankYou} />
+          <div className="container-fluid">
+            <Route exact path="/" component={InputName} />
+            <Route exact path="/fill-survey" component={FillSurvey} />
+            <Route exact path="/thank-you" component={ThankYou} />
+          </div>
         </Switch>
       </Router>
     );
