@@ -103,7 +103,7 @@ class FillSurvey extends Component {
               ? attraction.description.substring(0, 180) + "..."
               : attraction.description}
           </td>
-          <td className="rating-stars">{this.renderStars(i)}</td>
+          <td className="rating-stars">{this.renderStars(attraction.nrCrt)}</td>
         </tr>
       );
     });
